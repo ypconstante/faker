@@ -12,16 +12,6 @@ defmodule Faker do
   end
 
   @doc """
-  Starts Faker with `lang` locale.
-  """
-  @spec start(atom) :: :ok
-  def start(lang) when is_atom(lang) do
-    :application.start(:faker)
-    locale(lang)
-    :ok
-  end
-
-  @doc """
   Internal function to format string.
 
   It replaces `"#"` to random number and `"?"` to random Latin letter.
@@ -86,14 +76,6 @@ defmodule Faker do
   @spec country() :: atom
   def country do
     Application.get_env(:faker, :country)
-  end
-
-  @doc """
-  Sets application locale.
-  """
-  @spec locale(atom) :: :ok
-  def locale(lang) when is_atom(lang) do
-    Application.put_env(:faker, :locale, lang)
   end
 
   @doc """
