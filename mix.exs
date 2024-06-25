@@ -26,16 +26,7 @@ defmodule Faker.Mixfile do
 
   def application do
     [
-      applications: [:crypto],
-      env: env()
-    ]
-  end
-
-  defp env do
-    [
-      locale: :en,
-      country: nil,
-      random_module: Faker.Random.Elixir
+      applications: [:crypto]
     ]
   end
 
