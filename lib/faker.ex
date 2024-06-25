@@ -3,6 +3,10 @@ defmodule Faker do
   Main module to start application with some helper functions.
   """
 
+  @locale Application.compile_env(:faker, :locale, :en)
+  @country Application.compile_env(:faker, :country, nil)
+  @random_module Application.compile_env(:faker, :random_module, Faker.Random.Elixir)
+
   @doc """
   Starts Faker with default locale.
   """
@@ -66,17 +70,13 @@ defmodule Faker do
   Returns application locale.
   """
   @spec locale() :: atom
-  def locale do
-    Application.get_env(:faker, :locale)
-  end
+  def locale, do: @locale
 
   @doc """
   Returns application country.
   """
   @spec country() :: atom
-  def country do
-    Application.get_env(:faker, :country)
-  end
+  def country, do: @country
 
   @doc """
   Returns a random float in the value range 0.0 =< x < 1.0.
@@ -88,7 +88,7 @@ defmodule Faker do
   """
   @spec random_uniform() :: float
   def random_uniform do
-    Application.get_env(:faker, :random_module).random_uniform()
+    @random_module.random_uniform()
   end
 
   @doc """
@@ -101,7 +101,7 @@ defmodule Faker do
   """
   @spec random_between(integer, integer) :: integer
   def random_between(left, right) do
-    Application.get_env(:faker, :random_module).random_between(left, right)
+    @random_module.random_between(left, right)
   end
 
   @doc """
@@ -109,7 +109,7 @@ defmodule Faker do
   """
   @spec random_bytes(pos_integer) :: binary
   def random_bytes(total) do
-    Application.get_env(:faker, :random_module).random_bytes(total)
+    @random_module.random_bytes(total)
   end
 
   defmacro localize(function) do
