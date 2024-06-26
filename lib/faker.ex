@@ -138,20 +138,28 @@ defmodule Faker do
         end
       end)
 
-    quote do
-      def unquote(function)() do
-        locale_module = unquote(locale_module)
-        fallback_module = unquote(fallback_module)
-        function = unquote(function)
+    # When locale is `En` or a module for the locale is found we can avoid
+    # runtime checks and delegate directly to the found module.
+    if mlocale == "En" or locale_module == fallback_module do
+      quote do
+        defdelegate unquote(function)(), to: unquote(fallback_module)
+      end
+    else
+      quote do
+        def unquote(function)() do
+          locale_module = unquote(locale_module)
+          fallback_module = unquote(fallback_module)
+          function = unquote(function)
 
-        module =
-          if function_exported?(locale_module, function, 0) do
-            locale_module
-          else
-            fallback_module
-          end
+          module =
+            if function_exported?(locale_module, function, 0) do
+              locale_module
+            else
+              fallback_module
+            end
 
-        apply(module, function, [])
+          apply(module, function, [])
+        end
       end
     end
   end
