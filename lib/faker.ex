@@ -112,18 +112,46 @@ defmodule Faker do
     @random_module.random_bytes(total)
   end
 
-  defmacro localize(function) do
+  defmacro localize(function) when is_atom(function) do
+    caller = __CALLER__.module
+
+    mlocale = Faker.mlocale()
+    locale_module = Module.concat(caller, mlocale)
+
+    possible_modules = [
+      locale_module,
+      Module.concat(caller, EnUs),
+      Module.concat(caller, En)
+    ]
+
+    fallback_module =
+      Enum.find(possible_modules, fn module ->
+        case Code.ensure_compiled(module) do
+          {:module, _} ->
+            function_exported?(module, function, 0)
+
+          {:error, :unavailable} ->
+            raise "Module #{module} depends on #{caller}, remove this dependency"
+
+          {:error, _} ->
+            false
+        end
+      end)
+
     quote do
       def unquote(function)() do
-        caller = unquote(__CALLER__.module)
-        fn_impl = unquote(function)
-        fn_args = []
-        fallback = Module.concat(caller, En)
+        locale_module = unquote(locale_module)
+        fallback_module = unquote(fallback_module)
+        function = unquote(function)
 
-        [Faker.mlocale(), EnUs]
-        |> Stream.map(&Module.concat(caller, &1))
-        |> Enum.find(fallback, &function_exported?(&1, fn_impl, 0))
-        |> apply(fn_impl, fn_args)
+        module =
+          if function_exported?(locale_module, function, 0) do
+            locale_module
+          else
+            fallback_module
+          end
+
+        apply(module, function, [])
       end
     end
   end
